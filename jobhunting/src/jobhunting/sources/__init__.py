@@ -4,6 +4,7 @@ from .remotive import RemotiveSource
 from .cryptjobslist import CryptoJobsListSource
 from .web3career import Web3CareerSource
 from .remoteok import RemoteOKSource
+from .freelancer import FreelancerSource
 
 __all__ = [
     "JobSource",
@@ -11,6 +12,7 @@ __all__ = [
     "CryptoJobsListSource",
     "Web3CareerSource",
     "RemoteOKSource",
+    "FreelancerSource",
 ]
 
 
@@ -20,6 +22,7 @@ def get_source(name: str, config: dict) -> JobSource | None:
         "cryptjobslist": CryptoJobsListSource,
         "web3career": Web3CareerSource,
         "remoteok": RemoteOKSource,
+        "freelancer": FreelancerSource,
     }
     cls = mapping.get(name)
     return cls(config) if cls else None

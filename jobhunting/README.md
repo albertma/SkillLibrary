@@ -23,8 +23,9 @@ surfaces the openings worth your time, with materials ready to send.
 
 ## Features
 
-- **4 sources, keyword-driven**: Remotive API, RemoteOK API, Web3.career,
-  CryptoJobsList (blockchain/Crypto focus; easy to add more in `sources/`)
+- **5 sources, keyword-driven**: Remotive API, RemoteOK API, Web3.career,
+  CryptoJobsList (blockchain/Crypto focus) + **Freelancer.com 官方 API（接单/gig，
+  固定预算或时薪，自动过滤无关噪声单）**; easy to add more in `sources/`
 - **Title-first scoring** — long JDs can't keyword-stuff their way to the top;
   generic talent-marketplace listings (Lemon.io, Toptal…) are penalized
 - **Location-aware**: +bonus when a posting covers your region (e.g. APAC),

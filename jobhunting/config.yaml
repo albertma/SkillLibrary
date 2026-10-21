@@ -66,6 +66,42 @@ sources:
       - "part time"
     max_results: 60
 
+  # Freelancer.com：自由职业接单（官方公开 API，无需登录）
+  freelancer:
+    enabled: true
+    keywords:
+      - "golang"
+      - "python backend"
+      - "blockchain"
+      - "smart contract"
+      - "solidity"
+      - "rust"
+      - "ai agent"
+      - "llm"
+      - "trading bot"
+      - "fastapi"
+    exclude_keywords:
+      - "homework"
+      - "assignment"
+      - "essay"
+      - "exam"
+      - "coursework"
+      - "wordpress"
+      - "shopify"
+      - "repair"
+      - "repaint"
+      - "logo"
+      - "mascot"
+      - "tiktok"
+      - "translation"
+      - "data entry"
+      - "recruiter"
+      - "content creator"
+      - "meme coin"
+      - "kdp"
+    per_query: 20
+    max_results: 60
+
 # ── 评分配置 ──────────────────────────────────────────────────────────
 # 标题优先：标题命中是最强信号；描述命中封顶防止长 JD 堆词刷分；
 # 人才库（Lemon.io 等"先进池子再匹配"的中介）降权

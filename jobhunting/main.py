@@ -200,6 +200,9 @@ def main() -> None:
     replied_p = sub.add_parser("replied", help="登记已收到回复（停止跟进提醒）")
     replied_p.add_argument("job_id", help="Job ID")
 
+    fup = sub.add_parser("followups", help="列出超时未回复的投递（跟进提醒）")
+    fup.add_argument("--push", action="store_true", help="推送到飞书")
+
     chat_p = sub.add_parser("chat", help="LLM 对话：询问职位 ")
     chat_p.add_argument("--fit", action="store_true", help="LLM 深度匹配分析（job_fit_analysis）")
     chat_p.add_argument("--draft", action="store_true", help="LLM 生成定制 Cover Letter（完整自然语言版）")

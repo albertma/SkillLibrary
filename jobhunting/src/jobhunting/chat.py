@@ -164,8 +164,14 @@ def _profile_summary(profile: dict) -> str:
         f"定位: {profile.get('headline','')}",
         f"工作年限: {profile.get('years_experience',0)} 年",
         f"时区: {profile.get('timezone_flexibility','')}",
-        f"\n核心技能:",
+        f"邮箱: {profile.get('email','（未提供）')}",
+        f"电话: {profile.get('phone','（未提供）')}",
     ]
+    _links = profile.get("links") or {}
+    for _label, _key in (("GitHub", "github"), ("LinkedIn", "linkedin")):
+        if _links.get(_key):
+            lines.append(f"{_label}: {_links[_key]}")
+    lines.append("\n核心技能:")
     for s in profile.get("skills", []):
         lines.append(f"  - {s}")
     lines.append("\n亮点项目:")
