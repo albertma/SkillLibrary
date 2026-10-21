@@ -1,0 +1,33 @@
+# Environment
+.env
+
+# Virtualenv
+.venv/
+*.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+
+# Data
+data/
+logs/
+
+# 个人申请材料（含隐私，不入库）
+drafts/
+profile.yaml
+
+# Personal
+web3career_profile.yaml
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Resume drafts (personal)
+resume/
