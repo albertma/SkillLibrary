@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Trapping Rain Water — 算法示意图</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #020617;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  h1 {
+    font-size: 20px;
+    color: #22d3ee;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 30px;
+  }
+  .diagram-container {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    position: relative;
+  }
+  .diagram-container svg { display: block; }
+  .legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    font-size: 11px;
+    align-items: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-color {
+    width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid;
+  }
+  .step-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 20px 24px;
+    max-width: 800px;
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  .step-card h3 {
+    font-size: 13px;
+    color: #34d399;
+    margin-bottom: 10px;
+  }
+  .step-card p {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.7;
+  }
+  .step-card code {
+    color: #fbbf24;
+    background: #1e293b;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+  }
+  .highlight-cyan { color: #22d3ee; }
+  .highlight-green { color: #34d399; }
+  .highlight-yellow { color: #fbbf24; }
+  .highlight-rose { color: #fb7185; }
+</style>
+</head>
+<body>
+<h1>⛰️ Trapping Rain Water</h1>
+<p class="subtitle">双指针法 · O(n) 时间 · O(1) 空间 · height = [0,1,0,2,1,0,1,3,2,1,2,1]</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-color" style="background:#475569;border-color:#64748b;"></div>柱子（高度）</div>
+  <div class="legend-item"><div class="legend-color" style="background:#0ea5e9;border-color:#38bdf8;"></div>雨水（6格）</div>
+  <div class="legend-item"><div class="legend-color" style="background:#f59e0b;border-color:#fbbf24;"></div>left / right 指针</div>
+  <div class="legend-item"><div class="legend-color" style="background:#ef4444;border-color:#f87171;"></div>短板决定水量</div>
+</div>
+
+<div class="diagram-container">
+<svg width="740" height="460" viewBox="0 0 740 460">
+  <!-- 背景网格 -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"/></marker>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+
+  <!-- ====== 柱子坐标 ======
+   索引:  0  1  2  3  4  5  6  7  8  9 10 11
+   高度:  0  1  0  2  1  0  1  3  2  1  2  1
+   x 起点: 40 100 160 220 280 340 400 460 520 580 640 700
+   柱宽: 40px (每60px一个)
+   比例: 1单位高度 = 30px
+   基准线: y=420
+  ======================= -->
+
+  <!-- 刻度参考线 (y轴) -->
+  <line x1="20" y1="420" x2="740" y2="420" stroke="#334155" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="20" y1="390" x2="740" y2="390" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="20" y1="360" x2="740" y2="360" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="20" y1="330" x2="740" y2="330" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <line x1="20" y1="300" x2="740" y2="300" stroke="#1e293b" stroke-width="0.5" stroke-dasharray="2,4"/>
+  <text x="15" y="424" fill="#475569" font-size="9">0</text>
+  <text x="15" y="364" fill="#475569" font-size="9">2</text>
+  <text x="15" y="304" fill="#475569" font-size="9">4</text>
+  <text x="15" y="244" fill="#475569" font-size="9">6</text>
+  <text x="15" y="184" fill="#475569" font-size="9">8</text>
+
+  <!-- 雨水填充 (半透明蓝色, 在柱子之间的凹槽中) -->
+  <!-- 索引0: 高0, 无水 -->
+  <!-- 索引1: 高1, 右侧有墙, 但左max<右max时无水 -->
+  <!-- 索引2: 高0, left_max=1, right_max=3, water=1 -->
+  <rect x="163" y="390" width="34" height="30" fill="rgba(14,165,233,0.5)" stroke="#38bdf8" stroke-width="0.5"/>
+  <!-- 索引3: 高2, 柱子本身, 无水 -->
+  <!-- 索引4: 高1, left_max=2, right_max=3, water=1 -->
+  <rect x="283" y="390" width="34" height="30" fill="rgba(14,165,233,0.5)" stroke="#38bdf8" stroke-width="0.5"/>
+  <!-- 索引5: 高0, left_max=2, right_max=3, water=2 -->
+  <rect x="343" y="360" width="34" height="30" fill="rgba(14,165,233,0.5)" stroke="#38bdf8" stroke-width="0.5"/>
+  <rect x="343" y="390" width="34" height="30" fill="rgba(14,165,233,0.5)" stroke="#38bdf8" stroke-width="0.5"/>
+  <!-- 索引6: 高1, left_max=2, right_max=3, water=1 -->
+  <rect x="403" y="390" width="34" height="30" fill="rgba(14,165,233,0.5)" stroke="#38bdf8" stroke-width="0.5"/>
+  <!-- 索引7: 高3, 柱子本身 -->
+  <!-- 索引8: 高2, left_max=3, right_max=2, water=0 (右侧没更高的墙) -->
+  <!-- 索引9: 高1, left_max=3, right_max=2, water=1 -->
+  <rect x="583" y="390" width="34" height="30" fill="rgba(14,165,233,0.5)" stroke="#38bdf8" stroke-width="0.5"/>
+  <!-- 索引10: 高2, left_max=3, right_max=2, water=0 -->
+  <!-- 索引11: 高1, left_max=3, right_max=1, water=0 -->
+
+  <!-- 柱子 (从后往前画, 让雨水在柱子下层) -->
+  <!-- 索引0: 高度0 -->
+  <rect x="42" y="420" width="36" height="0" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引1: 高度1 -->
+  <rect x="102" y="390" width="36" height="30" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引2: 高度0 -->
+  <rect x="162" y="420" width="36" height="0" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引3: 高度2 -->
+  <rect x="222" y="360" width="36" height="60" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引4: 高度1 -->
+  <rect x="282" y="390" width="36" height="30" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引5: 高度0 -->
+  <rect x="342" y="420" width="36" height="0" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引6: 高度1 -->
+  <rect x="402" y="390" width="36" height="30" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引7: 高度3 (最高墙) -->
+  <rect x="462" y="330" width="36" height="90" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引8: 高度2 -->
+  <rect x="522" y="360" width="36" height="60" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引9: 高度1 -->
+  <rect x="582" y="390" width="36" height="30" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引10: 高度2 -->
+  <rect x="642" y="360" width="36" height="60" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+  <!-- 索引11: 高度1 -->
+  <rect x="702" y="390" width="36" height="30" fill="#475569" stroke="#64748b" stroke-width="1.5" rx="2"/>
+
+  <!-- 水体积标注 -->
+  <text x="172" y="384" fill="#38bdf8" font-size="8" text-anchor="middle">1</text>
+  <text x="293" y="384" fill="#38bdf8" font-size="8" text-anchor="middle">1</text>
+  <text x="353" y="352" fill="#38bdf8" font-size="8" text-anchor="middle">2</text>
+  <text x="413" y="384" fill="#38bdf8" font-size="8" text-anchor="middle">1</text>
+  <text x="593" y="384" fill="#38bdf8" font-size="8" text-anchor="middle">1</text>
+
+  <!-- 总水量标注 -->
+  <rect x="280" y="140" width="180" height="30" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="370" y="160" fill="#38bdf8" font-size="14" font-weight="bold" text-anchor="middle">总水量 = 1+1+2+1+1 = 6</text>
+  <line x1="310" y1="170" x2="320" y2="200" stroke="#38bdf8" stroke-width="1"/>
+
+  <!-- 双指针标注 -->
+  <!-- left 指针 -->
+  <line x1="459" y1="240" x2="483" y2="320" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow)"/>
+  <rect x="420" y="210" width="80" height="24" rx="4" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="460" y="226" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">← left</text>
+
+  <!-- right 指针 -->
+  <line x1="690" y1="240" x2="720" y2="320" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrow)"/>
+  <rect x="650" y="210" width="80" height="24" rx="4" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="690" y="226" fill="#fbbf24" font-size="11" font-weight="bold" text-anchor="middle">right →</text>
+
+  <!-- 短板水位线 -->
+  <line x1="380" y1="330" x2="460" y2="330" stroke="#f87171" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <rect x="340" y="300" width="100" height="24" rx="4" fill="#0f172a" stroke="#f87171" stroke-width="1.5"/>
+  <text x="390" y="316" fill="#f87171" font-size="10" text-anchor="middle">短板 = min(左max, 右max)</text>
+
+  <!-- 索引标注 -->
+  <g fill="#475569" font-size="9" text-anchor="middle">
+    <text x="60" y="442">0</text>
+    <text x="120" y="442">1</text>
+    <text x="180" y="442">2</text>
+    <text x="240" y="442">3</text>
+    <text x="300" y="442">4</text>
+    <text x="360" y="442">5</text>
+    <text x="420" y="442">6</text>
+    <text x="480" y="442">7</text>
+    <text x="540" y="442">8</text>
+    <text x="600" y="442">9</text>
+    <text x="660" y="442">10</text>
+    <text x="720" y="442">11</text>
+  </g>
+
+  <!-- 高度标注 -->
+  <g fill="#64748b" font-size="8" text-anchor="middle">
+    <text x="120" y="385">1</text>
+    <text x="240" y="355">2</text>
+    <text x="300" y="385">1</text>
+    <text x="420" y="385">1</text>
+    <text x="480" y="325">3</text>
+    <text x="540" y="355">2</text>
+    <text x="600" y="385">1</text>
+    <text x="660" y="355">2</text>
+    <text x="720" y="385">1</text>
+  </g>
+</svg>
+</div>
+
+<!-- 算法说明步骤 -->
+<div class="step-card">
+  <h3>📐 算法核心思路</h3>
+  <p>
+    每个位置能接多少水，取决于 <code>min(左侧最高柱子, 右侧最高柱子) - 当前高度</code>。
+    但暴力法需要 O(n²)。双指针优化：<span class="highlight-yellow">维护 left_max 和 right_max</span>，
+    哪边 <span class="highlight-rose">短板</span> 就计算哪边，然后往中间移动。
+  </p>
+</div>
+
+<div class="step-card">
+  <h3>🔄 执行过程</h3>
+  <p>
+    ① left=0, right=11，<code>left_max=0, right_max=1</code> → 左边是短板 → <code>water += 0-0=0</code>, left→1<br>
+    ② left=1, right=11，<code>left_max=1, right_max=1</code> → 相等走 else → <code>water += 1-1=0</code>, right→10<br>
+    ③ left=1, right=10，<code>left_max=1, right_max=2</code> → 左边短板 → <code>water += 1-1=0</code>, left→2<br>
+    ④ left=2, right=10，<code>left_max=1, right_max=2</code> → 左边短板 → <span class="highlight-cyan">water += 1-0 = <b>1</b></span>, left→3<br>
+    ⑤ left=3, right=10，<code>left_max=2, right_max=2</code> → 相等 → <code>water += 2-2=0</code>, right→9<br>
+    ⑥ left=3, right=9，<code>left_max=2, right_max=2</code> → 相等 → <span class="highlight-cyan">water += 2-1 = <b>1</b></span>, right→8<br>
+    ⑦ left=3, right=8，<code>left_max=2, right_max=2</code> → 相等 → <code>water += 2-2=0</code>, right→7<br>
+    ⑧ left=3, right=7，<code>left_max=2, right_max=3</code> → 左边短板 → <code>water += 2-2=0</code>, left→4<br>
+    ⑨ left=4, right=7，<code>left_max=2, right_max=3</code> → 左边短板 → <span class="highlight-cyan">water += 2-1 = <b>1</b></span>, left→5<br>
+    ⑩ left=5, right=7，<code>left_max=2, right_max=3</code> → 左边短板 → <span class="highlight-cyan">water += 2-0 = <b>2</b></span>, left→6<br>
+    ⑪ left=6, right=7，<code>left_max=2, right_max=3</code> → 左边短板 → <span class="highlight-cyan">water += 2-1 = <b>1</b></span>, left→7<br>
+    ⑫ left=7, right=7 → 退出循环 ✨
+  </p>
+</div>
+
+<div class="step-card">
+  <h3>💡 面试要点</h3>
+  <p>
+    ▸ 为什么 <code>left_max < right_max</code> 时就能确定 <code>left</code> 位置的水量？<br>
+    因为 <span class="highlight-yellow">右墙已经足够高</span>（<code>right_max</code> 是当前从右扫到的最高），即使右边还有更高的也不影响 left 位置的水量（短板原理）。<br><br>
+    ▸ 另一种解法：<span class="highlight-green">单调栈</span>（O(n) 时间, O(n) 空间）—— 面试时提一下展示你会的多。<br><br>
+    ▸ 暴力法 O(n²) 不提也罢，直接上双指针。
+  </p>
+</div>
+
+</body>
+</html>

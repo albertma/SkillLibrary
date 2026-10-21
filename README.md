@@ -8,6 +8,7 @@ Agent Skills 库。每个子目录是一个独立 skill，遵循 [Agent Skills �
 |---|---|
 | [styled-editor](styled-editor/) | 固定文风的公众号写手：把大纲、思考、灵感写成约 2000 字的微信公众号文章，油画封面插图 + 固定格式 HTML 导出 + 爆款建议 |
 | [jobhunting](jobhunting/) | 求职管家：抓取远程职位、按画像评分、每日推送飞书/Telegram，LLM 深度匹配分析与定制 Cover Letter，投递跟进提醒 |
+| [interview-prep](interview-prep/) | 算法面试教练：讲题（分步注释 + 复杂度 + 可视化）、出题、模拟面试，题解库随使用积累 |
 
 ## 安装
 
